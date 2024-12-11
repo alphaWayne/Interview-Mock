@@ -1,0 +1,166 @@
+{% extends 'base_box.html' %}
+{% block static %}
+<style>
+    .mode:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        border: none;
+        cursor: pointer;
+    }
+
+    .input {
+        height: 30px;
+        width: 90%;
+        border: none;
+        border-radius: 10px;
+        margin-top: 5px;
+        padding-left: 15px;
+        border: 0.5px solid #ccc;
+    }
+
+    .input:hover {
+        box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .input:focus {
+        border-color: #2970ff;
+        /* 蓝色边框 */
+        outline: none;
+        /* 去除焦点时的默认外框线 */
+        /* box-shadow: 0 0 5px rgba(0, 0, 255, 0.5); */
+        /* 蓝色阴影 */
+    }
+
+    .captche {
+        width: 40%;
+        height: 30px;
+        margin-top: 5px;
+        background-color: rgba(23, 114, 246, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: small;
+        color: #fff;
+        border-radius: 5px;
+    }
+
+    .captche:hover {
+        cursor: pointer;
+        background-color: rgba(23, 114, 246);
+    }
+
+    .captche:active {
+        transform: scale(0.98);
+        background-color: rgba(23, 114, 246, 0.8);
+    }
+
+    .error_message {
+        height: 10px;
+        width: 90%;
+        font-size: small;
+        font-weight: 200;
+        color: red;
+        margin-top: 2px;
+        margin-bottom: 5px;
+    }
+
+    .navigator {
+        font-size: small;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+{% block body %}
+<div style="height: 95%;width: 30%;margin: 0 auto;display: flex;align-items: center;justify-content: center;">
+    <form style="height: 100%;width: 80%;margin-top: 5%;" method="POST">
+        <h2
+            style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;">
+            UIBE Interview Mock | 探索未来，就等“拟”来🥳</h2>
+        <span>&nbsp;&nbsp;🤩注册开启“拟”的未来</span><br>
+        <div style="margin-top: 5px;">
+            <span
+                style="font-size: small;font-weight: 300;color: rgba(0,0,0,0.45);width: 100%;">邮件会自动发送到校园邮箱，请注意查收！</span>
+        </div>
+        <div
+            style="width: 100%;display: flex;flex-direction: column;align-items: center;justify-content: space-around;margin-top: 10px;">
+            <div style="font-size: small;width: 100%;padding-left: 10%;">学号</div>
+            {{form.username(class="input",placeholder='输入您的学号',autocomplete="off",id="username")}}
+            <div class="error_message">
+                {% for error in form.username.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            <div style="font-size: smaller;width: 100%;padding-left: 10%;">密码</div>
+            {{form.password(class="input",placeholder='输入您的密码',autocomplete="off")}}
+            <div class="error_message">
+                {% for error in form.password.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            <div style="font-size: smaller;width: 100%;padding-left: 10%;">确认密码</div>
+            {{form.confirm_password(class='input',placeholder='确认您的密码',autocomplete='off')}}
+            <div class="error_message">
+                {% for error in form.confirm_password.errors %}
+                {{ error }}
+                {% endfor %}
+            </div>
+            <div style="font-size: smaller;width: 100%;padding-left: 10%;">验证码</div>
+            <div
+                style="width: 90%;display: flex;align-items: center;padding-left: 15px;justify-content: space-between;">
+                {{form.captcha(class='input',placeholder='输入验证码',autocomplete='off',style='width:
+                70%;margin-left:-15px;margin-right:5%;')}}
+                <div class="captche" onclick="getCaptcha()">获取验证码</div>
+            </div>
+            <div class="error_message">
+                {% for message in get_flashed_messages() %}
+                {{ message }}
+                {% endfor %}
+            </div>
+            {{form.csrf_token}}
+            {{form.submit(class="captche",style="border:none;width:95%;margin-top:20px")}}
+            <span class="navigator">已有账号？
+                <a href="/login" style="color: rgba(23, 114, 246);text-decoration: none;">去登陆</a>
+            </span>
+        </div>
+    </form>
+</div>
+<script>
+    function isAllDigits(str) {
+        return /^\d+$/.test(str);
+    }
+    function getCaptcha() {
+        const usernameInput = document.querySelector('#username');
+        const username = usernameInput.value;
+        if (isAllDigits(username) && username !== '') {
+            fetch('/getCaptche', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `username=${encodeURIComponent(username)}`
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // 处理成功情况，例如显示验证码已发送
+                        showMessage(data.message);
+                    } else {
+                        // 处理错误情况
+                        showMessage('验证码发送失败');
+
+                    }
+                })
+                .catch(error => {
+                    showMessage('发送失败,请联系管理员');
+                    console.error('请求失败:', error);
+                });
+        } else {
+            showMessage('请输入有效的学号');
+        }
+    }
+</script>
+{% endblock %}

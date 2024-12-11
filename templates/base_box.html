@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="icon" href="{{ url_for('static', filename='image/system/InterViewMock_logo_little.png') }}">
+    {% block static %}{% endblock %}
+    <style>
+        #messageBox {
+            opacity: 0;
+            transition: all 0.5s ease-out;
+            transform: translateY(-100%);
+        }
+
+        #messageBox.show {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #messageBox.hide {
+            opacity: 0;
+            transform: translateY(-100%);
+            transition-delay: 2s;
+            /* 停留3秒后开始消失 */
+        }
+    </style>
+</head>
+
+<body
+    style="background-image: url('{{ url_for('static', filename='image/background.png') }}'); background-size: cover;">
+    <div style="position: fixed;top: 40px;width: 14%;height:60px;background-color: rgba(0,0,0,0.05);left: 43%;border-radius: 10px;display: flex;align-items: center;justify-content: center;font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;color: rgba(0,0,0,0.6);letter-spacing: 0.15em;font-size: smaller;"
+        id="messageBox"></div>
+    <div
+        style="width: 96vw;height: 96vh;background-color: #fff;margin: 2vh 2vw;border-radius: 20px; box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);">
+        <div style="height: 10%;width: 94%;margin: 0 auto;display: flex;align-items: center;justify-content: space-between;">
+            <div style="max-width: fit-content;">
+                <img src="{{ url_for('static', filename='image/system/InterViewMock_logo.png') }}" style="height: 80px;width: 80px;padding-top: 60px;">
+            </div>
+            <div style="height: 15px;max-width: max-content;border-radius: 10px;display: flex;align-items: center;justify-content:center;padding: 10px;border: 0.5px solid #ccc;"
+                class="mode">
+                {% if current_user.is_authenticated %}
+                <i class="bi bi-person-fill"></i>
+                <a
+                    style="font-size: small;font-weight: 500;margin-left: 3px;font-family:'Times New Roman', Times, serif;color: #000;text-decoration: none;" href="/logout">{{current_user.username}}</a>
+                {%else%}
+                <i class="bi bi-person"></i>
+                <span
+                    style="font-size: small;font-weight: 500;margin-left: 3px;font-family:'Times New Roman', Times, serif;">&nbsp;未登录&nbsp;</span>
+                {%endif%}
+            </div>
+        </div>
+        <div style="width: 100%;height: 83%;display: flex;align-items: center;">
+            {% block body %}
+            {% endblock %}
+        </div>
+        <div style="height: 5%;width: 94%;margin: 0 auto;display: flex;align-items:end;font-size: small;">
+            © &nbsp;<span id="nowyear"></span> &nbsp; UIBE 𝕏 Interview Mock.
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('nowyear').textContent = new Date().getFullYear();
+        function showMessage(message) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = message; // 设置消息内容
+
+            // 首先移除hide类，确保消息框可以被正确显示
+            messageBox.classList.remove('hide');
+
+            // 显示消息提示框
+            messageBox.classList.add('show');
+
+            // 停留3秒后隐藏
+            setTimeout(() => {
+                messageBox.classList.remove('show'); // 移除show类，开始隐藏动画
+                setTimeout(() => { // 确保hide类在动画完成后添加
+                    messageBox.classList.add('hide');
+                }, 500); // 这里的500是隐藏动画的持续时间，与CSS中transition的持续时间相匹配
+            }, 2000);
+        }
+    </script>
+</body>
+
+</html>
